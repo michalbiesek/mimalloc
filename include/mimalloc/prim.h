@@ -177,7 +177,7 @@ static inline void* mi_prim_tls_slot(size_t slot) mi_attr_noexcept {
     res = tcb[slot];
   #elif defined(__riscv)
     void** tcb; MI_UNUSED(ofs);
-    __asm__ __volatile__ ("mv %0, tp" : "=r" (tcb));
+    __asm__ __volatile__ ("csrr %0, mhartid" : "=r"(tcb));
     res = tcb[slot];
   #endif
   return res;
@@ -208,7 +208,7 @@ static inline void mi_prim_tls_slot_set(size_t slot, void* value) mi_attr_noexce
     tcb[slot] = value;
   #elif defined(__riscv)
     void** tcb; MI_UNUSED(ofs);
-    __asm__ __volatile__ ("mv %0, tp" : "=r" (tcb));
+    __asm__ __volatile__ ("csrr %0, mhartid" : "=r"(tcb));
     tcb[slot] = value;
   #endif
 }
