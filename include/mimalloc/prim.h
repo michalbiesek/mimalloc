@@ -145,7 +145,7 @@ static inline mi_threadid_t _mi_prim_thread_id(void) mi_attr_noexcept {
 // If you test on another platform and it works please send a PR :-)
 // see also https://akkadia.org/drepper/tls.pdf for more info on the TLS register.
 #elif defined(__GNUC__) && ( \
-           (defined(__GLIBC__)   && (defined(__x86_64__) || defined(__i386__) || defined(__arm__) || defined(__aarch64__))) \
+           (defined(__GLIBC__)   && (defined(__x86_64__) || defined(__i386__) || defined(__arm__) || defined(__aarch64__) || defined (__riscv))) \
         || (defined(__APPLE__)   && (defined(__x86_64__) || defined(__aarch64__))) \
         || (defined(__BIONIC__)  && (defined(__x86_64__) || defined(__i386__) || defined(__arm__) || defined(__aarch64__))) \
         || (defined(__FreeBSD__) && (defined(__x86_64__) || defined(__i386__) || defined(__aarch64__))) \
@@ -175,6 +175,10 @@ static inline void* mi_prim_tls_slot(size_t slot) mi_attr_noexcept {
     __asm__ volatile ("mrs %0, tpidr_el0" : "=r" (tcb));
     #endif
     res = tcb[slot];
+  #elif defined(__riscv)
+    void** tcb; MI_UNUSED(ofs);
+    __asm__ __volatile__ ("mv %0, tp" : "=r" (tcb));
+    res = tcb[slot];
   #endif
   return res;
 }
@@ -201,6 +205,10 @@ static inline void mi_prim_tls_slot_set(size_t slot, void* value) mi_attr_noexce
     #else
     __asm__ volatile ("mrs %0, tpidr_el0" : "=r" (tcb));
     #endif
+    tcb[slot] = value;
+  #elif defined(__riscv)
+    void** tcb; MI_UNUSED(ofs);
+    __asm__ __volatile__ ("mv %0, tp" : "=r" (tcb));
     tcb[slot] = value;
   #endif
 }
