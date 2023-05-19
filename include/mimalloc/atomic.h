@@ -335,7 +335,7 @@ static inline void mi_atomic_yield(void) {
 }
 #elif (defined(__GNUC__) || defined(__clang__)) && \
       (defined(__x86_64__) || defined(__i386__) || defined(__arm__) || defined(__armel__) || defined(__ARMEL__) || \
-       defined(__aarch64__) || defined(__powerpc__) || defined(__ppc__) || defined(__PPC__)) || defined(__POWERPC__)
+       defined(__aarch64__) || defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) || defined (__riscv)) || defined(__POWERPC__)
 #if defined(__x86_64__) || defined(__i386__)
 static inline void mi_atomic_yield(void) {
   __asm__ volatile ("pause" ::: "memory");
@@ -361,6 +361,10 @@ static inline void mi_atomic_yield(void) {
 #elif defined(__armel__) || defined(__ARMEL__)
 static inline void mi_atomic_yield(void) {
   __asm__ volatile ("nop" ::: "memory");
+}
+#elif defined(__riscv)
+static inline void mi_atomic_yield(void) {
+  __asm__ __volatile__ (".insn i 0x0F, 0, x0, x0, 0x010");
 }
 #endif
 #elif defined(__sun)
